@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Therapy Booking{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Welcome Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">Welcome, {{ current_user.full_name }}!</h1>
+        <p class="text-gray-600">Manage your therapy appointments</p>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="mb-8">
+        <a href="{{ url_for('patient.book') }}"
+           class="inline-block bg-primary text-white px-6 py-3 rounded-lg hover:bg-teal-600 transition">
+            📅 Book New Appointment
+        </a>
+    </div>
+
+    <!-- Upcoming Appointments -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Upcoming Appointments</h2>
+
+        {% if upcoming %}
+            <div class="space-y-4">
+                {% for appointment in upcoming %}
+                    <div class="border border-gray-200 rounded-lg p-4 flex justify-between items-center">
+                        <div>
+                            <p class="font-medium text-gray-800">
+                                {{ appointment.start_time.strftime('%A, %B %d, %Y') }}
+                            </p>
+                            <p class="text-gray-600">
+                                {{ appointment.start_time.strftime('%I:%M %p') }} -
+                                {{ appointment.end_time.strftime('%I:%M %p') }}
+                            </p>
+                        </div>
+                        <div class="flex space-x-2">
+                            {% if appointment.can_reschedule() %}
+                                <a href="{{ url_for('patient.reschedule_appointment', appointment_id=appointment.id) }}"
+                                   class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-sm">
+                                    Reschedule
+                                </a>
+                            {% endif %}
+                            {% if appointment.can_cancel() %}
+                                <form action="{{ url_for('patient.cancel_appointment', appointment_id=appointment.id) }}"
+                                      method="POST"
+                                      onsubmit="return confirm('Are you sure you want to cancel this appointment?');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit"
+                                            class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 text-sm">
+                                        Cancel
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-500">No upcoming appointments.
+                <a href="{{ url_for('patient.book') }}" class="text-primary hover:underline">Book one now!</a>
+            </p>
+        {% endif %}
+    </div>
+
+    <!-- Past Appointments -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Recent Appointments</h2>
+
+        {% if past %}
+            <div class="space-y-3">
+                {% for appointment in past %}
+                    <div class="border-b border-gray-100 pb-3 last:border-0">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-gray-800">
+                                    {{ appointment.start_time.strftime('%B %d, %Y at %I:%M %p') }}
+                                </p>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-sm
+                                {% if appointment.status == 'completed' %}bg-green-100 text-green-800
+                                {% elif appointment.status == 'cancelled' %}bg-red-100 text-red-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ appointment.status.title() }}
+                            </span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-500">No past appointments.</p>
+        {% endif %}
+    </div>
+</div>

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Therapy Booking{% endblock %}
+
+{% block content %}
+<div class="min-h-[70vh] flex items-center justify-center py-8">
+    <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-2">Create Account</h1>
+        <p class="text-gray-600 text-center mb-6">Register to book your therapy appointments</p>
+
+        <form method="POST" action="{{ url_for('auth.register') }}">
+            {{ form.hidden_tag() }}
+
+            <!-- Full Name -->
+            <div class="mb-4">
+                <label for="full_name" class="block text-gray-700 font-medium mb-2">Full Name</label>
+                {{ form.full_name(class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary", placeholder="John Doe") }}
+                {% if form.full_name.errors %}
+                    {% for error in form.full_name.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <!-- Email -->
+            <div class="mb-4">
+                <label for="email" class="block text-gray-700 font-medium mb-2">Email</label>
+                {{ form.email(class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary", placeholder="your@email.com") }}
+                {% if form.email.errors %}
+                    {% for error in form.email.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <!-- Phone -->
+            <div class="mb-4">
+                <label for="phone" class="block text-gray-700 font-medium mb-2">Phone (Optional)</label>
+                {{ form.phone(class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary", placeholder="+1 234 567 8900") }}
+            </div>
+
+            <!-- Password -->
+            <div class="mb-4">
+                <label for="password" class="block text-gray-700 font-medium mb-2">Password</label>
+                {{ form.password(class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary") }}
+                {% if form.password.errors %}
+                    {% for error in form.password.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="mb-6">
+                <label for="confirm_password" class="block text-gray-700 font-medium mb-2">Confirm Password</label>
+                {{ form.confirm_password(class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary") }}
+                {% if form.confirm_password.errors %}
+                    {% for error in form.confirm_password.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit"
+                    class="w-full bg-primary text-white py-2 px-4 rounded-lg hover:bg-teal-600 transition duration-200">
+                Create Account
+            </button>
+        </form>
+
+        <p class="text-center text-gray-600 mt-6">
+            Already have an account?
+            <a href="{{ url_for('auth.login') }}" class="text-primary hover:underline">Sign in</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

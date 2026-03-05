@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Book Appointment - Therapy Booking{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">Book an Appointment</h1>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <form method="POST" action="{{ url_for('patient.book') }}" id="booking-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <!-- Step 1: Select Date -->
+            <div class="mb-6">
+                <label class="block text-gray-700 font-medium mb-3">Select a Date</label>
+                <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2" id="date-grid">
+                    {% for available_date in available_dates %}
+                        <button type="button"
+                                class="date-btn p-3 border rounded-lg text-center hover:bg-primary hover:text-white transition"
+                                data-date="{{ available_date.strftime('%Y-%m-%d') }}"
+                                hx-get="{{ url_for('patient.get_slots', date_str=available_date.strftime('%Y-%m-%d')) }}"
+                                hx-target="#time-slots"
+                                hx-swap="innerHTML">
+                            <div class="text-sm font-medium">{{ available_date.strftime('%a') }}</div>
+                            <div class="text-lg font-bold">{{ available_date.day }}</div>
+                            <div class="text-xs">{{ available_date.strftime('%b') }}</div>
+                        </button>
+                    {% endfor %}
+                </div>
+                <input type="hidden" name="date" id="selected-date">
+            </div>
+
+            <!-- Step 2: Select Time (loaded via HTMX) -->
+            <div class="mb-6">
+                <label class="block text-gray-700 font-medium mb-3">Select a Time</label>
+                <div id="time-slots" class="min-h-[100px] border-2 border-dashed border-gray-200 rounded-lg p-4 flex items-center justify-center">
+                    <p class="text-gray-400">Select a date to see available times</p>
+                </div>
+                <input type="hidden" name="time" id="selected-time">
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit"
+                    id="book-btn"
+                    disabled
+                    class="w-full bg-primary text-white py-3 px-4 rounded-lg hover:bg-teal-600 transition disabled:bg-gray-300 disabled:cursor-not-allowed">
+                Confirm Booking
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Handle date selection
+    document.querySelectorAll('.date-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Remove active state from all
+            document.querySelectorAll('.date-btn').forEach(b => {
+                b.classList.remove('bg-primary', 'text-white');
+            });
+            // Add active state to clicked
+            this.classList.add('bg-primary', 'text-white');
+            // Set hidden input
+            document.getElementById('selected-date').value = this.dataset.date;
+            // Reset time selection
+            document.getElementById('selected-time').value = '';
+            document.getElementById('book-btn').disabled = true;
+        });
+    });
+
+    // Handle time selection (delegated because loaded via HTMX)
+    document.getElementById('time-slots').addEventListener('click', function(e) {
+        if (e.target.classList.contains('time-btn')) {
+            // Remove active state from all
+            document.querySelectorAll('.time-btn').forEach(b => {
+                b.classList.remove('bg-primary', 'text-white');
+            });
+            // Add active state to clicked
+            e.target.classList.add('bg-primary', 'text-white');
+            // Set hidden input
+            document.getElementById('selected-time').value = e.target.dataset.time;
+            // Enable submit button
+            document.getElementById('book-btn').disabled = false;
+        }
+    });
+</script>
+{% endblock %}
+```
+
+Create `app/templates/patient/partials/time_slots.html`:
+```html
+{% if slots %}
+    <div class="grid grid-cols-3 sm:grid-cols-4 gap-2">
+        {% for slot in slots %}
+            <button type="button"
+                    class="time-btn p-3 border rounded-lg text-center hover:bg-primary hover:text-white transition"
+                    data-time="{{ slot['time'].strftime('%H:%M') }}">
+                {{ slot['display'] }}
+            </button>
+        {% endfor %}
+    </div>
+{% else %}
+    <p class="text-gray-500 text-center">No available slots for this date.</p>
+{% endif %}
