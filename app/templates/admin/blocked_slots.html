@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Block Time Slots - Therapy Booking{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">Block Time Slots</h1>
+
+    <!-- Add Block Form -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Block New Time</h2>
+        <form method="POST" action="{{ url_for('admin.blocked_slots') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-gray-700 mb-2">Date</label>
+                    <input type="date" name="date" required
+                           min="{{ now.strftime('%Y-%m-%d') }}"
+                           class="w-full border rounded px-3 py-2">
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2">Reason (Optional)</label>
+                    <input type="text" name="reason" placeholder="e.g., Conference"
+                           class="w-full border rounded px-3 py-2">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-gray-700 mb-2">From</label>
+                    <input type="time" name="start_time" required
+                           class="w-full border rounded px-3 py-2">
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2">To</label>
+                    <input type="time" name="end_time" required
+                           class="w-full border rounded px-3 py-2">
+                </div>
+            </div>
+
+            <button type="submit" class="bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600">
+                Block Time
+            </button>
+        </form>
+    </div>
+
+    <!-- Current Blocks -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-semibold mb-4">Current Blocked Slots</h2>
+        {% if blocks %}
+            <div class="space-y-3">
+                {% for block in blocks %}
+                    <div class="flex justify-between items-center border rounded p-3">
+                        <div>
+                            <p class="font-medium">{{ block.date.strftime('%B %d, %Y') }}</p>
+                            <p class="text-sm text-gray-600">
+                                {{ block.start_time.strftime('%I:%M %p') }} -
+                                {{ block.end_time.strftime('%I:%M %p') }}
+                                {% if block.reason %} • {{ block.reason }}{% endif %}
+                            </p>
+                        </div>
+                        <form action="{{ url_for('admin.delete_blocked_slot', block_id=block.id) }}" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="text-red-500 hover:text-red-700">
+                                Delete
+                            </button>
+                        </form>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-500">No blocked slots.</p>
+        {% endif %}
+    </div>
+
+    <div class="mt-4">
+        <a href="{{ url_for('admin.dashboard') }}" class="text-primary hover:underline">
+            ← Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}
