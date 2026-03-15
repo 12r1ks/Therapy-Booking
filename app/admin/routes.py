@@ -169,7 +169,7 @@ def appointments():
     if search:
         query = query.filter(User.full_name.ilike(f'%{search}%'))
 
-    appointments = query.order_by(Appointment.start_time.desc()).all()
+    appointments = query.order_by(Appointment.start_time.asc()).all()
 
     return render_template('admin/appointments.html',
                            appointments=appointments,

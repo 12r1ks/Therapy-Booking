@@ -10,10 +10,6 @@
             <h1 class="text-3xl font-bold text-gray-800">My Appointments</h1>
             <p class="text-gray-600">All your therapy sessions</p>
         </div>
-        <a href="{{ url_for('patient.book') }}"
-           class="bg-primary text-white px-5 py-2 rounded-lg hover:bg-teal-600 transition">
-            + Book New
-        </a>
     </div>
 
     <!-- Filter Tabs -->
@@ -64,11 +60,11 @@
                                     {{ appointment.start_time.strftime('%I:%M %p') }} —
                                     {{ appointment.end_time.strftime('%I:%M %p') }}
                                 </p>
-                                <p class="text-sm text-gray-400 mt-1">
-                                    Booked on {{ appointment.created_at.strftime('%B %d, %Y') }}
+                                <p class="font-semibold text-gray-800">
+                                    Patient: {{ appointment.patient.full_name }}
                                 </p>
                                 {% if appointment.cancellation_reason %}
-                                    <p class="text-sm text-red-500 mt-1">
+                                     <p class="font-semibold text-gray-800">
                                         Reason: {{ appointment.cancellation_reason }}
                                     </p>
                                 {% endif %}
@@ -89,26 +85,14 @@
                                 {% else %}{{ appointment.status.title() }}{% endif %}
                             </span>
 
-                            <!-- Action Buttons -->
+                            <!-- Action Buttons Patient Name-->
                             <div class="flex space-x-2">
-                                {% if appointment.can_reschedule() %}
                                     <a href="{{ url_for('patient.reschedule_appointment', appointment_id=appointment.id) }}"
                                        class="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition">
-                                        Reschedule
+                                       Patient: {{ appointment.patient.full_name }}
                                     </a>
-                                {% endif %}
-                                {% if appointment.can_cancel() %}
-                                    <form action="{{ url_for('patient.cancel_appointment', appointment_id=appointment.id) }}"
-                                          method="POST"
-                                          onsubmit="return confirm('Cancel this appointment?');">
-                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                        <button type="submit"
-                                                class="text-sm bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition">
-                                            Cancel
-                                        </button>
-                                    </form>
-                                {% endif %}
                             </div>
+
                         </div>
                     </div>
                 </div>
