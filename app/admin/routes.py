@@ -150,6 +150,8 @@ def appointments():
     date_from = request.args.get('date_from')
     date_to = request.args.get('date_to')
     search = request.args.get('search', '')
+    patient_id = request.args.get('patient_id', type=int)
+    all_patients = User.query.filter_by(role='patient').order_by(User.full_name).all()
 
     # Base query
     query = Appointment.query.join(User)
@@ -169,12 +171,17 @@ def appointments():
     if search:
         query = query.filter(User.full_name.ilike(f'%{search}%'))
 
+    if patient_id:
+        query = query.filter(Appointment.patient_id == patient_id)
+
     appointments = query.order_by(Appointment.start_time.asc()).all()
 
     return render_template('admin/appointments.html',
                            appointments=appointments,
+                           patients=all_patients,
                            filters={'status': status, 'date_from': date_from,
-                                   'date_to': date_to, 'search': search})
+                                    'date_to': date_to, 'search': search,
+                                    'patient_id': patient_id})
 
 
 @bp.route('/appointments/<int:appointment_id>/cancel', methods=['POST'])

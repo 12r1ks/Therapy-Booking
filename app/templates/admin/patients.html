@@ -15,14 +15,14 @@
     {% if patients %}
         <div class="space-y-4" id="patients-list">
             {% for patient in patients %}
-                <a href="{{ url_for('admin.patient_detail', patient_id=patient.id) }}" class="block">
+                <a href="{{ url_for('admin.appointments', patient_id=patient.id) }}" class="block">
                     <div class="patient-card bg-white rounded-lg shadow-sm border border-gray-100 p-5 hover:border-primary transition">
                         <div class="flex justify-between items-center">
                             <div>
                                 <p class="font-semibold text-gray-800">{{ patient.full_name }}</p>
                                 <p class="text-gray-600">{{ patient.email }}</p>
                             </div>
-                            <span class="text-primary text-sm">View Details →</span>
+                            <span class="text-primary text-sm">View Appointments →</span>
                         </div>
                     </div>
                 </a>
