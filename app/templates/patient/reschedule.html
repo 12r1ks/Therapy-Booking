@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Reschedule Appointment - Therapy Booking{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <h1 class="text-3xl font-bold text-gray-800 mb-2">Reschedule Appointment</h1>
+    <p class="text-gray-600 mb-6">
+        Current time:
+        {{ appointment.start_time.strftime('%A, %B %d, %Y') }} at
+        {{ appointment.start_time.strftime('%I:%M %p') }}
+    </p>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <form method="POST"
+              action="{{ url_for('patient.reschedule_appointment', appointment_id=appointment.id) }}"
+              id="reschedule-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="mb-6">
+                <label class="block text-gray-700 font-medium mb-3">Select a new date</label>
+                {% if available_dates %}
+                <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2" id="date-grid">
+                    {% for available_date in available_dates %}
+                        <button type="button"
+                                class="date-btn p-3 border rounded-lg text-center hover:bg-primary hover:text-white transition"
+                                data-date="{{ available_date.strftime('%Y-%m-%d') }}"
+                                hx-get="{{ url_for('patient.get_slots', date_str=available_date.strftime('%Y-%m-%d')) }}"
+                                hx-target="#time-slots"
+                                hx-swap="innerHTML">
+                            <div class="text-sm font-medium">{{ available_date.strftime('%a') }}</div>
+                            <div class="text-lg font-bold">{{ available_date.day }}</div>
+                            <div class="text-xs">{{ available_date.strftime('%b') }}</div>
+                        </button>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-gray-500">No reschedule dates are available. Please contact your therapist.</p>
+                {% endif %}
+                <input type="hidden" name="date" id="selected-date">
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-gray-700 font-medium mb-3">Select a new time</label>
+                <div id="time-slots" class="min-h-[100px] border-2 border-dashed border-gray-200 rounded-lg p-4 flex items-center justify-center">
+                    <p class="text-gray-400">Select a date to see available times</p>
+                </div>
+                <input type="hidden" name="time" id="selected-time">
+            </div>
+
+            <button type="submit"
+                    id="reschedule-btn"
+                    disabled
+                    class="w-full bg-primary text-white py-3 px-4 rounded-lg hover:bg-teal-600 transition disabled:bg-gray-300 disabled:cursor-not-allowed">
+                Confirm new time
+            </button>
+        </form>
+    </div>
+
+    <div class="mt-6">
+        <a href="{{ url_for('patient.appointments') }}" class="text-primary hover:underline">
+            ← Back to my appointments
+        </a>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.date-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.date-btn').forEach(b => {
+                b.classList.remove('bg-primary', 'text-white');
+            });
+            this.classList.add('bg-primary', 'text-white');
+            document.getElementById('selected-date').value = this.dataset.date;
+            document.getElementById('selected-time').value = '';
+            document.getElementById('reschedule-btn').disabled = true;
+        });
+    });
+
+    document.getElementById('time-slots').addEventListener('click', function(e) {
+        if (e.target.classList.contains('time-btn')) {
+            document.querySelectorAll('.time-btn').forEach(b => {
+                b.classList.remove('bg-primary', 'text-white');
+            });
+            e.target.classList.add('bg-primary', 'text-white');
+            document.getElementById('selected-time').value = e.target.dataset.time;
+            document.getElementById('reschedule-btn').disabled = false;
+        }
+    });
+</script>
+{% endblock %}

@@ -98,15 +98,11 @@
                                     </a>
                                 {% endif %}
                                 {% if appointment.can_cancel() %}
-                                    <form action="{{ url_for('patient.cancel_appointment', appointment_id=appointment.id) }}"
-                                          method="POST"
-                                          onsubmit="return confirm('Cancel this appointment?');">
-                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                        <button type="submit"
-                                                class="text-sm bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition">
-                                            Cancel
-                                        </button>
-                                    </form>
+                                    <button type="button"
+                                            class="open-cancel-modal text-sm bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
+                                            data-cancel-url="{{ url_for('patient.cancel_appointment', appointment_id=appointment.id) }}">
+                                        Cancel
+                                    </button>
                                 {% endif %}
                             </div>
                         </div>
@@ -139,6 +135,43 @@
     </div>
 </div>
 
+<!-- Cancel modal (overlay) -->
+<div id="cancel-modal"
+     class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/50"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="cancel-modal-title">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 relative"
+         onclick="event.stopPropagation()">
+        <button type="button"
+                id="cancel-modal-x"
+                class="absolute top-3 right-3 text-2xl leading-none text-gray-400 hover:text-gray-700"
+                aria-label="Close">&times;</button>
+        <h3 id="cancel-modal-title" class="text-lg font-semibold text-gray-800 mb-1">Cancel appointment</h3>
+        <p class="text-sm text-gray-500 mb-4">Add an optional reason, then confirm.</p>
+        <form id="cancel-modal-form" method="POST" action="">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <label for="cancel-modal-reason" class="block text-sm font-medium text-gray-700 mb-1">Reason (optional)</label>
+            <textarea id="cancel-modal-reason"
+                      name="reason"
+                      rows="3"
+                      class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 resize-y focus:ring-2 focus:ring-primary focus:border-primary"
+                      placeholder="Why are you cancelling?"></textarea>
+            <div class="flex flex-wrap gap-2 justify-end mt-5">
+                <button type="button"
+                        id="cancel-modal-back"
+                        class="text-sm px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
+                    Back
+                </button>
+                <button type="submit"
+                        class="text-sm bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+                    Confirm cancellation
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
     function filterAppointments(status) {
         const cards = document.querySelectorAll('.appointment-card');
@@ -154,7 +187,9 @@
             }
         });
 
-        noResults.classList.toggle('hidden', visible > 0);
+        if (noResults) {
+            noResults.classList.toggle('hidden', visible > 0);
+        }
 
         // Update tab styles
         document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -167,5 +202,36 @@
             active.classList.remove('bg-white', 'text-gray-600', 'border');
         }
     }
+
+    const cancelModal = document.getElementById('cancel-modal');
+    const cancelForm = document.getElementById('cancel-modal-form');
+    const cancelReason = document.getElementById('cancel-modal-reason');
+
+    function openCancelModal(actionUrl) {
+        if (!cancelForm || !cancelModal) return;
+        cancelForm.action = actionUrl;
+        if (cancelReason) cancelReason.value = '';
+        cancelModal.classList.remove('hidden');
+        cancelModal.classList.add('flex');
+        document.body.classList.add('overflow-hidden');
+    }
+
+    function closeCancelModal() {
+        if (!cancelModal) return;
+        cancelModal.classList.add('hidden');
+        cancelModal.classList.remove('flex');
+        document.body.classList.remove('overflow-hidden');
+    }
+
+    document.querySelectorAll('.open-cancel-modal').forEach(btn => {
+        btn.addEventListener('click', () => openCancelModal(btn.dataset.cancelUrl));
+    });
+
+    document.getElementById('cancel-modal-back')?.addEventListener('click', closeCancelModal);
+    document.getElementById('cancel-modal-x')?.addEventListener('click', closeCancelModal);
+
+    cancelModal?.addEventListener('click', (e) => {
+        if (e.target === cancelModal) closeCancelModal();
+    });
 </script>
 {% endblock %}

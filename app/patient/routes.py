@@ -207,8 +207,10 @@ def cancel_appointment(appointment_id):
         return redirect(url_for('patient.appointments'))
 
     # Cancel the appointment
+    reason = (request.form.get('reason') or '').strip()
     appointment.status = 'cancelled'
     appointment.cancelled_by = 'patient'
+    appointment.cancellation_reason = reason or None
     db.session.commit()
 
     flash('Appointment cancelled successfully.', 'success')
