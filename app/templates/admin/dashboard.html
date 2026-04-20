@@ -1,1 +1,113 @@
+{% extends "base.html" %}
 
+{% block title %}Therapist Dashboard - Therapy Booking{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">Therapist Dashboard</h1>
+        <p class="text-gray-600">Welcome back, {{ current_user.full_name }}</p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="text-3xl font-bold text-primary">{{ stats.today_count }}</div>
+            <div class="text-gray-600">Today's Appointments</div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="text-3xl font-bold text-blue-500">{{ stats.upcoming_count }}</div>
+            <div class="text-gray-600">This Week</div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="text-3xl font-bold text-green-500">{{ stats.total_patients }}</div>
+            <div class="text-gray-600">Total Patients</div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="text-3xl font-bold text-purple-500">{{ stats.this_month }}</div>
+            <div class="text-gray-600">Completed This Month</div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="mb-8 flex space-x-4">
+        <a href="{{ url_for('admin.availability') }}"
+           class="bg-primary text-white px-4 py-2 rounded hover:bg-teal-600">
+            ⚙️ Manage Availability
+        </a>
+        <a href="{{ url_for('admin.blocked_slots') }}"
+           class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
+            🚫 Block Time
+        </a>
+        <a href="{{ url_for('admin.calendar') }}"
+           class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+            📅 Calendar View
+        </a>
+        <a href="{{ url_for('admin.appointments') }}"
+           class="bg-blue-800 text-white px-4 py-2 rounded hover:bg-blue-600">
+           📋 Appointments List
+        </a>
+        <a href="{{ url_for('admin.patients') }}"
+        class="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-600">
+         🧑‍⚕️ Patients List
+     </a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Today's Appointments -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Today's Appointments</h2>
+            {% if todays_appointments %}
+                <div class="space-y-3">
+                    {% for apt in todays_appointments %}
+                        <div class="border border-gray-200 rounded p-3 flex justify-between items-center">
+                            <div>
+                                <p class="font-medium">{{ apt.patient.full_name }}</p>
+                                <p class="text-sm text-gray-600">
+                                    {{ apt.start_time.strftime('%I:%M %p') }}
+                                </p>
+                            </div>
+                            <form action="{{ url_for('admin.complete_appointment', appointment_id=apt.id) }}" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600">
+                                    Complete
+                                </button>
+                            </form>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-gray-500">No appointments scheduled for today.</p>
+            {% endif %}
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Recent Activity</h2>
+            {% if recent %}
+                <div class="space-y-3">
+                    {% for apt in recent %}
+                        <div class="border-b border-gray-100 pb-2 last:border-0">
+                            <div class="flex justify-between">
+                                <span class="font-medium">{{ apt.patient.full_name }}</span>
+                                <span class="text-sm px-2 py-1 rounded
+                                    {% if apt.status == 'scheduled' %}bg-blue-100 text-blue-800
+                                    {% elif apt.status == 'completed' %}bg-green-100 text-green-800
+                                    {% else %}bg-red-100 text-red-800{% endif %}">
+                                    {{ apt.status.title() }}
+                                </span>
+                            </div>
+                            <p class="text-sm text-gray-600">
+                                {{ apt.start_time.strftime('%B %d, %Y at %I:%M %p') }}
+                            </p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-gray-500">No recent activity.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

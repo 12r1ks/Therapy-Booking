@@ -1,1 +1,47 @@
+<nav class="bg-white shadow-md">
+    <div class="container mx-auto px-4">
+        <div class="flex justify-between items-center py-4">
+            <!-- Logo -->
+            <a href="/" class="text-2xl font-bold text-primary">
+                🗓️ Therapy Booking
+            </a>
 
+            <!-- Navigation Links -->
+            <div class="flex items-center space-x-4">
+                {% if current_user.is_authenticated %}
+                    {% if current_user.is_therapist() %}
+                        <a href="{{ url_for('admin.dashboard') }}"
+                           class="text-gray-600 hover:text-primary">Dashboard</a>
+                        <a href="{{ url_for('admin.calendar') }}"
+                           class="text-gray-600 hover:text-primary">Calendar</a>
+                        <a href="{{ url_for('admin.availability') }}"
+                           class="text-gray-600 hover:text-primary">Availability</a>
+                        <a href="{{ url_for('admin.patients') }}"
+                           class="text-gray-600 hover:text-primary">Patients</a>
+                    {% else %}
+                        <a href="{{ url_for('patient.dashboard') }}"
+                           class="text-gray-600 hover:text-primary">Dashboard</a>
+                        <a href="{{ url_for('patient.book') }}"
+                           class="text-gray-600 hover:text-primary">Book Appointment</a>
+                        <a href="{{ url_for('patient.appointments') }}"
+                           class="text-gray-600 hover:text-primary">My Appointments</a>
+                    {% endif %}
+
+                    <span class="text-gray-400">|</span>
+                    <span class="text-gray-600">{{ current_user.full_name }}</span>
+                    <a href="{{ url_for('auth.logout') }}"
+                       class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                        Logout
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}"
+                       class="text-gray-600 hover:text-primary">Login</a>
+                    <a href="{{ url_for('auth.register') }}"
+                       class="bg-primary text-white px-4 py-2 rounded hover:bg-teal-600">
+                        Register
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>

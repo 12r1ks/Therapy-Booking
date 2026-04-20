@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_migrate import Migrate
@@ -40,7 +40,6 @@ def create_app(config_name='default'):
     def index():
         return redirect(url_for('auth.login'))
 
-    from flask import redirect, url_for
 
     from app import models
     return app

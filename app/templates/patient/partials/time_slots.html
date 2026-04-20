@@ -1,0 +1,13 @@
+{% if slots %}
+    <div class="grid grid-cols-3 sm:grid-cols-4 gap-2">
+        {% for slot in slots %}
+            <button type="button"
+                    class="time-btn p-3 border rounded-lg text-center hover:bg-primary hover:text-white transition"
+                    data-time="{{ slot['time'].strftime('%H:%M') }}">
+                {{ slot['display'] }}
+            </button>
+        {% endfor %}
+    </div>
+{% else %}
+    <p class="text-gray-500 text-center">No available slots for this date.</p>
+{% endif %}

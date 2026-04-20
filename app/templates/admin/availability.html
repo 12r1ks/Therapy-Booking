@@ -1,1 +1,49 @@
+{% extends "base.html" %}
 
+{% block title %}Manage Availability - Therapy Booking{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">Weekly Availability</h1>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <form method="POST" action="{{ url_for('admin.availability') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="space-y-4">
+                {% for day in days %}
+                    {% set i  = loop.index0 %}
+                    <div class="flex items-center space-x-4 p-3 border rounded">
+                        <input type="checkbox"
+                               name="available_{{ i }}"
+                               id="available_{{ i }}"
+                               {% if current[i] and current[i].is_available %}checked{% endif %}
+                               class="w-5 h-5 text-primary">
+                        <label for="available_{{ i }}" class="w-24 font-medium">{{ day }}</label>
+                        <input type="time"
+                               name="start_{{ i }}"
+                               value="{{ current[i].start_time.strftime('%H:%M') if current[i] else '10:00' }}"
+                               class="border rounded px-2 py-1">
+                        <span>to</span>
+                        <input type="time"
+                               name="end_{{ i }}"
+                               value="{{ current[i].end_time.strftime('%H:%M') if current[i] else '18:00' }}"
+                               class="border rounded px-2 py-1">
+                    </div>
+                {% endfor %}
+            </div>
+
+            <button type="submit"
+                    class="mt-6 w-full bg-primary text-white py-3 rounded-lg hover:bg-teal-600 transition">
+                Save Changes
+            </button>
+        </form>
+    </div>
+
+    <div class="mt-4">
+        <a href="{{ url_for('admin.dashboard') }}" class="text-primary hover:underline">
+            ← Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}
